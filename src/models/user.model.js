@@ -13,9 +13,23 @@ const userSchema = mongoose.Schema(
       trim: true,
     },
     email: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      lowercase: true,
+      validate: {
+        validator: (value)=>{
+          return validator.isEmail(value)
+        },
+        message: (props)=>`${props.value} is not a valid email`
+      }
     },
     password: {
       type: String,
+      required: true,
+      trim: true,
+      min: [8, "password must be atleast 8 characters long"],
       validate(value) {
         if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
           throw new Error(
@@ -25,6 +39,9 @@ const userSchema = mongoose.Schema(
       },
     },
     walletMoney: {
+      type: Number,
+      required: true,
+      default: config.default_wallet_money
     },
     address: {
       type: String,
@@ -44,6 +61,14 @@ const userSchema = mongoose.Schema(
  * @returns {Promise<boolean>}
  */
 userSchema.statics.isEmailTaken = async function (email) {
+  let User = this;
+  try {
+    const existingUser = await  User.findOne({email});
+    
+    return !!existingUser;
+  } catch (error) {
+      return false;
+  }
 };
 
 
@@ -57,3 +82,7 @@ userSchema.statics.isEmailTaken = async function (email) {
 /**
  * @typedef User
  */
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = {User};
