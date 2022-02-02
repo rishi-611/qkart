@@ -84,7 +84,21 @@ userSchema.methods.isPasswordMatch = async function(candidatePassword){
   return isPasswordCorrect;
 }
 
-// TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS
+
+
+
+/**
+ * Check if user have set an address other than the default address
+ * - should return true if user has set an address other than default address
+ * - should return false if user's address is the default address
+ *
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.hasSetNonDefaultAddress = async function () {
+  const user = this;
+   return user.address === config.default_address;
+};
+
 /*
  * Create a Mongoose model out of userSchema and export the model as "User"
  * Note: The model should be accessible in a different module when imported like below
