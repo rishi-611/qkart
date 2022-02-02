@@ -39,7 +39,12 @@ const { userService } = require("../services");
  *
  */
 const getUser = catchAsync(async (req, res) => {
-  const id = req.params.userId;
+  const id = req.params.userId; //id of user whose data is requested
+  const requesterId = req.user._id.toString(); //id retrieved from auth middleware
+  
+  if(id!== req.user._id.toString()){
+    throw new ApiError(httpStatus.FORBIDDEN, "INVALID REQUEST");
+  }
   const user = await userService.getUserById(id);
   if(!user){
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");

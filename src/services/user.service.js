@@ -52,10 +52,9 @@ getUserByEmail = async (email)=>{
  */
 
 createUser = async (userData)=>{
-    if(User.isEmailTaken(userData.email)){
+    if(await User.isEmailTaken(userData.email)){
         throw new ApiError(httpStatus.OK, `Email already taken`)
     };
-
     const user  = await  User.create(userData);
     return user;
 

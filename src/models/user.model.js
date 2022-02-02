@@ -64,14 +64,25 @@ userSchema.statics.isEmailTaken = async function (email) {
   let User = this;
   try {
     const existingUser = await  User.findOne({email});
-    
-    return !!existingUser;
+    return existingUser? true : false;
   } catch (error) {
       return false;
   }
 };
 
+userSchema.pre("save", async function (next) {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 9);
+  }
+  next();
+});
 
+//check if the input password matches with this user's password
+userSchema.methods.isPasswordMatch = async function(candidatePassword){
+  const isPasswordCorrect = await bcrypt.compare(candidatePassword, this.password);
+  return isPasswordCorrect;
+}
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS
 /*
@@ -83,6 +94,7 @@ userSchema.statics.isEmailTaken = async function (email) {
  * @typedef User
  */
 
+ 
 const User = mongoose.model("User", userSchema);
 
 module.exports = {User};

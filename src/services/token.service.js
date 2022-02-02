@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { tokenTypes } = require("../config/tokens");
-
 /**
  * Generate jwt token
  * - Payload must contain fields
@@ -17,12 +16,19 @@ const { tokenTypes } = require("../config/tokens");
  * @returns {string}
  */
 const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
+  const payload = {
+    sub: userId,
+    exp: expires,
+    type,
+  };
+  const token = jwt.sign(payload, secret);
+  return token;
 };
 
 /**
  * Generate auth token
  * - Generate jwt token
- * - Token type should be "ACCESS"
+ * - Token type should be tokenTypes.ACCESS
  * - Return token and expiry date in required format
  *
  * @param {User} user
@@ -35,6 +41,21 @@ const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
  * }
  */
 const generateAuthTokens = async (user) => {
+  const expiresAt =
+    Math.floor(Date.now() / 1000) + config.jwt.accessExpirationMinutes * 60;
+
+  const accessToken = generateToken(
+    user._id,
+    expiresAt,
+    tokenTypes.ACCESS
+  );
+
+  return {
+    access: {
+      token: accessToken,
+      expires: new Date(expiresAt * 1000),
+    },
+  };
 };
 
 module.exports = {
