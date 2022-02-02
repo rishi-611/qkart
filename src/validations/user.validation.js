@@ -14,7 +14,14 @@ const getUser = {
   }),
 };
 
+const setAddress = {
+  body: Joi.object().keys({
+    address: Joi.string().min(20).required()
+  })
+}
+
 
 module.exports = {
   getUser,
+  setAddress
 };

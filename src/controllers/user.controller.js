@@ -54,15 +54,32 @@ const getUser = catchAsync(async (req, res) => {
   const id = req.params.userId; //id of user whose data is requested
   const requesterId = req.user._id.toString(); //id retrieved from auth middleware
   
-  if(id!== req.user._id.toString()){
+  //exit if user trying to retreive data of some other user
+  if(id!== requesterId){
     throw new ApiError(httpStatus.FORBIDDEN, "INVALID REQUEST");
   }
-  const user = await userService.getUserById(id);
-  if(!user){
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-  }
 
-  return res.status(200).json(user);
+  //check if address is requested as query
+  let query = null;
+  let user;
+  if(req.query["q"]==="address"){
+    user = await userService.getUserAddressById(id);
+
+    if(!user){
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+  
+    return res.status(200).json({address: user.address});
+  }else{
+    user = await userService.getUserById(id);
+
+    if(!user){
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+  
+    return res.status(200).json(user);
+  }  
+
 });
 
 
