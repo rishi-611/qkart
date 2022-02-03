@@ -21,6 +21,7 @@ const getCartByUser = async (user) => {
   const cart = await Cart.findOne({ email: user.email });
   if (!cart)
     throw new ApiError(httpStatus.NOT_FOUND, "User does not have a cart");
+    
   return cart;
 };
 
@@ -200,6 +201,36 @@ const deleteProductFromCart = async (user, productId) => {
  * @throws {ApiError} when cart is invalid
  */
 const checkout = async (user) => {
+  //find cart of this user
+  let cart = await Cart.findOne({ email: user.email });
+  if (!cart) throw new ApiError(httpStatus.BAD_REQUEST, "User does not have a cart");
+
+  
+  //check for non empty cart
+  if (cart.cartItems.length === 0) throw new ApiError(httpStatus.BAD_REQUEST, "Cart is empty");
+
+  //check if address is set
+  let hasAddress = await user.hasSetNonDefaultAddress();
+  if (!hasAddress) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Address not set");
+  }
+
+
+  //check for insufficient balance 
+  let totalCost = cart.cartItems.reduce((acc, item)=> acc + item.product.cost * item.quantity, 0);
+
+  if (totalCost > user.walletMoney) throw new ApiError(
+    httpStatus.BAD_REQUEST,
+    "User has insufficient money to process"
+  );
+
+  //deduct money from wallet
+  user.walletMoney -= totalCost;
+  await user.save();
+
+  //empty cart
+  cart.cartItems = [];
+  await cart.save();
 };
 
 module.exports = {
