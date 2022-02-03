@@ -39,11 +39,10 @@ describe("Cart test", () => {
        * }
        */
 
-      expect(res).rejects.toThrow(ApiError);
-
-      expect(res).rejects.toEqual(
+      await expect(res).rejects.toThrow(ApiError);
+      await expect(res).rejects.toEqual(
         expect.objectContaining({
-          statusCode: httpStatus.NOT_FOUND
+          statusCode: httpStatus.NOT_FOUND,
         })
       );
     });

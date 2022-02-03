@@ -203,7 +203,7 @@ const deleteProductFromCart = async (user, productId) => {
 const checkout = async (user) => {
   //find cart of this user
   let cart = await Cart.findOne({ email: user.email });
-  if (!cart) throw new ApiError(httpStatus.BAD_REQUEST, "User does not have a cart");
+  if (!cart) throw new ApiError(httpStatus.NOT_FOUND, "User does not have a cart");
 
   
   //check for non empty cart
